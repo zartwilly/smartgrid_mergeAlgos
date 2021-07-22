@@ -1829,7 +1829,108 @@ def test_lri_balanced_player_game_all_pijk_upper_08_onePeriod_doc2324_scenario12
             k_stop_learning_LRIx, bool_equilibrium_nash_LRIx, \
             Perf_sum_Vi_LRIx   
 
-#
+
+def test_lri_balanced_player_game_all_pijk_upper_08_onePeriod_doc2324_scenario1(
+        k_steps=None, learning_rate=None):
+    # steps of learning
+    k_steps = 100 if k_steps is None else k_steps                               #50000 #100 #250 # 5,250
+    t_periods = 1 #4
+    p_i_j_ks = [0.5, 0.5, 0.5]
+    dbg = False
+    
+    a = 1; b = 1; #a = 3; b = 5
+    pi_hp_plus = 10 #0.2*pow(10,-3)
+    pi_hp_minus = 20 # 0.33
+    learning_rate = 0.1 if learning_rate is None else learning_rate             #0.01 #0.1
+    utility_functions = [1,2]
+    utility_function_version = utility_functions[
+                                np.random.randint(low=0, 
+                                                  high=len(utility_functions))] #1,2
+    
+    manual_debug = False #True #False #True
+    gamma_version = -2 #4 #2 #1 #3: gamma_i_min #4: square_root
+    fct_aux.N_DECIMALS = 2
+    
+    path_to_arr_pl_M_T = os.path.join(*["tests", "AUTOMATE_INSTANCES_GAMES"])
+    used_instances = False 
+    
+    arr_pl_MTvars_init = None
+    
+    
+    scenario_name = "scenario1"
+    prob_scen, scenario = None, None
+    prob_scen = 0.6
+    prob_A_A = prob_scen; prob_A_C = 1-prob_scen;
+    prob_C_A = 1-prob_scen; prob_C_C = prob_scen;
+    scenario = [(prob_A_A, prob_A_C), 
+                (prob_C_A, prob_C_C)]
+    setA_m_players_1 = 10; setC_m_players_1 = 10;                              # 20 joueurs
+    setA_m_players_1 = 5; setC_m_players_1 = 5;                                # 10 joueurs
+
+    arr_pl_MTvars_init \
+        = fct_aux.get_or_create_instance_Pi_Ci_etat_AUTOMATE_SETAC_doc23(
+                        setA_m_players_1, setC_m_players_1, 
+                        t_periods, 
+                        scenario,
+                        scenario_name,
+                        path_to_arr_pl_M_T, used_instances)
+    fct_aux.checkout_values_Pi_Ci_arr_pl_SETAC_doc23(arr_pl_MTvars_init, 
+                                                     scenario_name)
+        
+
+    
+    pi_hp_plus_T, pi_hp_minus_T, \
+    phi_hp_plus_T, phi_hp_minus_T \
+        = fct_aux.compute_pi_phi_HP_minus_plus_all_t(
+            arr_pl_M_T_vars_init=arr_pl_MTvars_init,
+            t_periods=t_periods,
+            pi_hp_plus=pi_hp_plus,
+            pi_hp_minus=pi_hp_minus,
+            a=a,
+            b=b, 
+            gamma_version=gamma_version, 
+            manual_debug=manual_debug,
+            dbg=dbg)
+        
+    t = 0
+    pi_0_plus_t = fct_aux.PI_0_PLUS_INIT; pi_0_minus_t = fct_aux.PI_0_MINUS_INIT #3
+    arr_pl_MTvars_modif = fct_aux.compute_gamma_state_4_period_t(
+                                arr_pl_M_T_K_vars=arr_pl_MTvars_init.copy(), 
+                                t=t, 
+                                pi_0_plus=pi_0_plus_t, pi_0_minus=pi_0_minus_t,
+                                pi_hp_plus_t=pi_hp_plus_T[t], pi_hp_minus_t=pi_hp_minus_T[t],
+                                gamma_version=gamma_version,
+                                manual_debug=manual_debug,
+                                dbg=dbg)
+    
+    # return arr_pl_M_T_vars_init
+    name_simu = "LRI"+str(utility_function_version)+"_simu_"+datetime.now().strftime("%d%m_%H%M")
+    path_to_save = os.path.join("tests", name_simu)
+    
+    arr_pl_MTKvars_modif, profils_stabilisation_LRIx, \
+    k_stop_learning_LRIx, bool_equilibrium_nash_LRIx, \
+    Perf_sum_Vi_LRIx = lri_balanced_player_game_all_pijk_upper_08_onePeriod(
+                        arr_pl_MTvars_modif,
+                        pi_hp_plus=pi_hp_plus, 
+                        pi_hp_minus=pi_hp_minus,
+                        a=a, b=b,
+                        pi_hp_plus_T=pi_hp_plus_T, pi_hp_minus_T=pi_hp_minus_T, 
+                        phi_hp_plus_T=phi_hp_plus_T, phi_hp_minus_T=phi_hp_minus_T,
+                        gamma_version=gamma_version,
+                        k_steps=k_steps, 
+                        learning_rate=learning_rate,
+                        p_i_j_ks=p_i_j_ks,
+                        utility_function_version=utility_function_version,
+                        path_to_save=path_to_save, 
+                        manual_debug=manual_debug, 
+                        dbg=False)
+    
+    return arr_pl_MTKvars_modif, profils_stabilisation_LRIx, \
+            k_stop_learning_LRIx, bool_equilibrium_nash_LRIx, \
+            Perf_sum_Vi_LRIx   
+
+
+
 ###############################################################################
 #                   Execution
 #
@@ -1837,9 +1938,18 @@ def test_lri_balanced_player_game_all_pijk_upper_08_onePeriod_doc2324_scenario12
 if __name__ == "__main__":
     ti = time.time()
     
+    # arr_pl_MTKvars_modif, profils_stabilisation_LRIx, \
+    # k_stop_learning_LRIx, bool_equilibrium_nash_LRIx, \
+    # Perf_sum_Vi_LRIx  \
+    #     = test_lri_balanced_player_game_all_pijk_upper_08_onePeriod_doc2324_scenario123()
+        
+    learning_rate = 0.1; k_steps = 100
+    # learning_rate = 0.1; k_steps = 10000
+    # learning_rate = 0.01; k_steps = 50000
     arr_pl_MTKvars_modif, profils_stabilisation_LRIx, \
     k_stop_learning_LRIx, bool_equilibrium_nash_LRIx, \
     Perf_sum_Vi_LRIx  \
-        = test_lri_balanced_player_game_all_pijk_upper_08_onePeriod_doc2324_scenario123()
+        = test_lri_balanced_player_game_all_pijk_upper_08_onePeriod_doc2324_scenario1(
+            k_steps=k_steps, learning_rate=learning_rate)
     
     print("runtime = {}".format(time.time() - ti))
