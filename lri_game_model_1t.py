@@ -1253,6 +1253,34 @@ def checkout_prices_B_C_BB_CC_EB_LRI(arr_pl_MTKvars_modif,
                                             
 # _____         checkout prices from computing variables ---> fin        _____
 
+# _____     count players having proba > stop_learning_proba --> debut   _____
+def count_players_sup_stoplearningproba(arr_pl_MTKvars_modif, t, k):
+    arr_S1S2_is = arr_pl_MTKvars_modif[:,t,k,
+                             [fct_aux.AUTOMATE_INDEX_ATTRS["S1_p_i_j_k"], 
+                              fct_aux.AUTOMATE_INDEX_ATTRS["S2_p_i_j_k"]]]
+    count_players = np.count_nonzero(list(map(lambda x: max(x) >= fct_aux.STOP_LEARNING_PROBA, 
+                                              arr_S1S2_is)))
+    max_probas = list(map(lambda x: max(x), arr_S1S2_is))
+    mean_proba = np.array(list(map(lambda x: max(x), arr_S1S2_is))).mean()
+    # iindex des joueurs ayant  leur proba < fct_aux.STOP_LEARNING_PROBA 
+    max_probas_inf_maxlearningrate = list
+    max_probas_inf_maxlearningrate = \
+        [(id_pl, round(maxprob,2)) for id_pl, maxprob in enumerate(max_probas) \
+             if maxprob < fct_aux.STOP_LEARNING_PROBA]
+    
+    # combien de joueurs ont S1>stop_learning_rate
+    count_players_S1_sup_maxlearningrate \
+        = np.count_nonzero(list(map(lambda x: x[0]>=fct_aux.STOP_LEARNING_PROBA, 
+                                    arr_S1S2_is)))
+    # combien de joueurs ont S2>stop_learning_rate
+    count_players_S2_sup_maxlearningrate \
+        = np.count_nonzero(list(map(lambda x: x[1]>=fct_aux.STOP_LEARNING_PROBA, 
+                                    arr_S1S2_is)))
+    
+    return count_players, max_probas_inf_maxlearningrate, mean_proba, \
+            count_players_S1_sup_maxlearningrate, \
+            count_players_S2_sup_maxlearningrate
+# _____     count players having proba > stop_learning_proba --> fin   _____
 
 ###############################################################################
 #               definition  de l algo LRI one period: debut
@@ -1390,8 +1418,21 @@ def lri_balanced_player_game_all_pijk_upper_08_onePeriod(
     nb_repeat_k = 0
     k = 0
     while k<k_steps and not bool_stop_learning:
+        k_ = k if k==0 else k-1
+        count_players, max_probas_inf_maxlearningrate, mean_proba, \
+        count_players_S1_sup_maxlearningrate, \
+        count_players_S2_sup_maxlearningrate \
+            = count_players_sup_stoplearningproba(
+                arr_pl_MTKvars_modif=arr_pl_MTKvars_modif, 
+                t=t, k=k_)
         print(" -------  k = {}, nb_repeat_k = {}  ------- ".format(k, 
-                nb_repeat_k)) if k%50 == 0 else None
+                nb_repeat_k, )) if k%50 == 0 else None
+        k_100 = 100 if int(k_steps/100) <= 100 else int(k_steps/100) 
+        print("     *** count players:>{} = {}, S1>{}={}, S2>{}={}, mean_proba={}, \n max_probas={}, *** ".format(
+             fct_aux.STOP_LEARNING_PROBA, count_players, 
+             fct_aux.STOP_LEARNING_PROBA, count_players_S1_sup_maxlearningrate,
+             fct_aux.STOP_LEARNING_PROBA, count_players_S2_sup_maxlearningrate,
+             round(mean_proba,2), max_probas_inf_maxlearningrate)) if k%(k_100) == 0 else None
         
         ### balanced_player_game_t
         random_mode = True
@@ -1943,7 +1984,7 @@ if __name__ == "__main__":
     # Perf_sum_Vi_LRIx  \
     #     = test_lri_balanced_player_game_all_pijk_upper_08_onePeriod_doc2324_scenario123()
         
-    learning_rate = 0.1; k_steps = 100
+    learning_rate = 0.1; k_steps = 250 #100
     # learning_rate = 0.1; k_steps = 10000
     # learning_rate = 0.01; k_steps = 50000
     arr_pl_MTKvars_modif, profils_stabilisation_LRIx, \
