@@ -122,6 +122,7 @@ def execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(arr_pl_M_T_vars
         Perf_best_profils_bf = None; nb_best_profils_bf = None;
         Perf_bad_profils_bf = None; nb_bad_profils_bf = None;
         Perf_bad_profils_NH = None; nb_bad_profils_NH = None;
+        mean_proba_LRI2 = None; max_probas_inf_maxlearningrate_LRI2= None
         
         pi_0_plus_t = fct_aux.PI_0_PLUS_INIT #4
         pi_0_minus_t = fct_aux.PI_0_MINUS_INIT #3
@@ -166,9 +167,10 @@ def execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(arr_pl_M_T_vars
         list_dico_modes_profs_by_players_t_bestNH, \
         list_dico_modes_profs_by_players_t_badNH, \
         list_dico_modes_profs_by_players_t_midNH, \
-        keys_best_BF_NH, keys_bad_BF_NH \
+        keys_best_BF_NH, keys_bad_BF_NH, \
+        set_Perf_ts_BF, dico_modprofil_b0cO_Perf_t \
                 = bfNhGameModel.generer_balanced_players_4_modes_profils(
-                    arr_pl_MTvars_modif, 
+                    arr_pl_MTvars_modif.copy(), 
                     m_players, t,
                     pi_hp_plus_elt, pi_hp_minus_elt,
                     a, b,
@@ -187,16 +189,25 @@ def execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(arr_pl_M_T_vars
         msg = "pi_hp_plus_"+str(pi_hp_plus_elt)\
                        +"_pi_hp_minus_"+str(pi_hp_minus_elt)             
         
-        
+        arr_pl_MTvars_modif_LRI = arr_pl_MTvars_modif.copy()
+        arr_pl_MTvars_modif_BF_NH = arr_pl_MTvars_modif.copy()
+        boolean_BF_NH = True
         for algo_name in algos:
             path_to_save = os.path.join(name_dir, "simu_"+date_hhmm,
                                         msg, algo_name)
             
-            if algo_name in fct_aux.ALGO_NAMES_BF \
-                or algo_name in fct_aux.ALGO_NAMES_NASH:
+            if (algo_name in fct_aux.ALGO_NAMES_BF \
+                or algo_name in fct_aux.ALGO_NAMES_NASH) and boolean_BF_NH:
                 
                 algos_BF_NH = look4BF_NH(algos)
+                boolean_BF_NH = False
                     
+                # print("avant exec Si={}".format(arr_pl_MTvars_modif_BF_NH[:,:,fct_aux.AUTOMATE_INDEX_ATTRS["Si"]]))
+                # arr_pl_MTvars_modif_BF_NH[:,:,fct_aux.AUTOMATE_INDEX_ATTRS["Si"]] \
+                #     = arr_pl_M_T_vars_init[:,:,fct_aux.AUTOMATE_INDEX_ATTRS["Si"]]
+                # print("apres exec Si={}".format(arr_pl_MTvars_modif_BF_NH[:,:,fct_aux.AUTOMATE_INDEX_ATTRS["Si"]]))
+                
+                
                 dico_profils_BF, dico_profils_NH, \
                 dico_best_profils_BF, dico_bad_profils_BF, dico_mid_profils_BF, \
                 dico_best_profils_NH, dico_bad_profils_NH, dico_mid_profils_NH \
@@ -207,10 +218,12 @@ def execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(arr_pl_M_T_vars
                         list_dico_modes_profs_by_players_t_bestNH,
                         list_dico_modes_profs_by_players_t_badNH,
                         list_dico_modes_profs_by_players_t_midNH,
-                        keys_best_BF_NH, keys_bad_BF_NH,
+                        keys_best_BF_NH, keys_bad_BF_NH, 
+                        set_Perf_ts_BF, dico_modprofil_b0cO_Perf_t,             # TODO TO DELETE dico_modprofil_b0cO_Perf_t
                         pi_hp_plus_T, pi_hp_minus_T, 
                         m_players, t_periods,
-                        arr_pl_MTvars_modif=arr_pl_MTvars_modif.copy(), t=t,
+                        arr_pl_M_T_vars_init=arr_pl_M_T_vars_init.copy(),
+                        arr_pl_MTvars_modif=arr_pl_MTvars_modif_BF_NH.copy(), t=t,
                         algos_BF_NH=algos_BF_NH,
                         pi_hp_plus=pi_hp_plus_elt, 
                         pi_hp_minus=pi_hp_minus_elt,
@@ -257,12 +270,17 @@ def execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(arr_pl_M_T_vars
                                         msg, algo_name, str(learning_rate)
                                         )
                 Path(path_to_save).mkdir(parents=True, exist_ok=True)
+                
+                arr_pl_MTvars_modif_LRI[:,:,fct_aux.AUTOMATE_INDEX_ATTRS["Si"]] \
+                    = arr_pl_M_T_vars_init[:,:,fct_aux.AUTOMATE_INDEX_ATTRS["Si"]]
+                
                 arr_M_T_K_vars_LRI1, profils_stabilisation_LRI1, \
                 k_stop_learning_LRI1, bool_equilibrium_nash_LRI1, \
-                Perf_sum_Vi_LRI1 \
+                Perf_sum_Vi_LRI1, \
+                mean_proba_LRI1, max_probas_inf_maxlearningrate_LRI1 \
                     = onePeriodLriGameModel\
                         .lri_balanced_player_game_all_pijk_upper_08_onePeriod(
-                            arr_pl_MTvars_init=arr_pl_MTvars_modif.copy(),
+                            arr_pl_MTvars_init=arr_pl_MTvars_modif_LRI.copy(),
                             pi_hp_plus=pi_hp_plus_elt, 
                             pi_hp_minus=pi_hp_minus_elt,
                             a=a, b=b,
@@ -284,12 +302,17 @@ def execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(arr_pl_M_T_vars
                                         msg, algo_name, str(learning_rate)
                                         )
                 Path(path_to_save).mkdir(parents=True, exist_ok=True)
+                
+                arr_pl_MTvars_modif_LRI[:,:,fct_aux.AUTOMATE_INDEX_ATTRS["Si"]] \
+                    = arr_pl_M_T_vars_init[:,:,fct_aux.AUTOMATE_INDEX_ATTRS["Si"]]
+                
                 arr_M_T_K_vars_LRI2, profils_stabilisation_LRI2, \
                 k_stop_learning_LRI2, bool_equilibrium_nash_LRI2, \
-                Perf_sum_Vi_LRI2 \
+                Perf_sum_Vi_LRI2, \
+                mean_proba_LRI2, max_probas_inf_maxlearningrate_LRI2 \
                     = onePeriodLriGameModel\
                         .lri_balanced_player_game_all_pijk_upper_08_onePeriod(
-                            arr_pl_MTvars_init=arr_pl_MTvars_modif.copy(),
+                            arr_pl_MTvars_init=arr_pl_MTvars_modif_LRI.copy(),
                             pi_hp_plus=pi_hp_plus_elt, 
                             pi_hp_minus=pi_hp_minus_elt,
                             a=a, b=b,
@@ -304,10 +327,12 @@ def execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(arr_pl_M_T_vars
                             manual_debug=manual_debug, dbg=dbg) 
       
     
-        print("profils_stabilisation_LRI2={}, set_profils_NH={}, profils_NH={}, nb_best_profils_bf={}".format(
-                profils_stabilisation_LRI2, len(set(profils_NH)), len(profils_NH), 
+        print("profils_stabilisation_LRI2={}, profils_NH={}, nb_best_profils_bf={}".format(
+                profils_stabilisation_LRI2,
+                dico_profils_NH["nb_profils"], 
                 nb_best_profils_bf  ))
         
+        profils_NH = dico_profils_NH["nb_profils"]
         C1 = True if len(profils_NH) > 0 else False
         C2 = True if k_stop_learning_LRI2 < k_steps else False
         C4 = k_stop_learning_LRI2 if C2 else None
@@ -333,6 +358,8 @@ def execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(arr_pl_M_T_vars
         else:
             check_C7_inf_C6 = "NOK"
                 
+        mean_proba_players = mean_proba_LRI2
+        nb_players_prob_inf_max_probas_inf_maxlearningrate_LRI2 = len(max_probas_inf_maxlearningrate_LRI2)
         
         
         Cx={fct_aux.name_cols_CX["C1"]:[C1], fct_aux.name_cols_CX["C2"]:[C2], 
@@ -340,7 +367,13 @@ def execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(arr_pl_M_T_vars
             fct_aux.name_cols_CX["C5"]:[C5], fct_aux.name_cols_CX["C6"]:[C6], 
             fct_aux.name_cols_CX["C7"]:[C7], fct_aux.name_cols_CX["C9"]:[C9],
             fct_aux.name_cols_CX["check_C5_inf_C6"]:[check_C5_inf_C6], 
-            fct_aux.name_cols_CX["check_C7_inf_C6"]:[check_C7_inf_C6]}
+            fct_aux.name_cols_CX["check_C7_inf_C6"]:[check_C7_inf_C6], 
+            fct_aux.name_cols_CX["mean_proba_players"]:[mean_proba_players],
+            fct_aux.name_cols_CX["nb_players_proba_inf_{}".format(fct_aux.STOP_LEARNING_PROBA)]:\
+                [nb_players_prob_inf_max_probas_inf_maxlearningrate_LRI2],
+            fct_aux.name_cols_CX["players_proba_inf_{}".format(fct_aux.STOP_LEARNING_PROBA)]:\
+                [max_probas_inf_maxlearningrate_LRI2]
+            }
         
         path_to_save = name_dir.split(os.sep)[0:2]
         path_to_save.append("save_all_instances")
@@ -353,7 +386,6 @@ def execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(arr_pl_M_T_vars
             
     print("NB_EXECUTION cpt={}".format(cpt))
             
-    
 #------------------------------------------------------------------------------
 #                   definitions of unittests
 #------------------------------------------------------------------------------
@@ -419,6 +451,8 @@ def test_execute_BF_NH_LRI_OnePeriod_N_INSTANCES_MULTI():
         
     algo_names = fct_aux.ALGO_NAMES_LRIx + fct_aux.ALGO_NAMES_DET \
                     + fct_aux.ALGO_NAMES_BF + fct_aux.ALGO_NAMES_NASH
+    
+    
     gamma_version = -2            
     execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(
         arr_pl_M_T_vars_init = arr_pl_MTvars_init,

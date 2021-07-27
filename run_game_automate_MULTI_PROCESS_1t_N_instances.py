@@ -135,7 +135,7 @@ def define_parameters_MULTI_gammaV_instances_phiname_arrplMTVars(dico_params):
                 date_hhmm_new = "_".join([date_hhmm, str(numero_instance), 
                                           "t", str(dico_params["t_periods"])])
                 
-                param = [arr_pl_M_T_vars_init, 
+                param = [arr_pl_M_T_vars_init.copy(), 
                          name_dir_oneperiod,
                          date_hhmm_new,
                          k_steps,
@@ -223,9 +223,9 @@ if __name__ == "__main__":
     
     date_hhmm="DDMM_HHMM"
     t_periods = 1 #50 #30 #35 #55 #117 #15 #3
-    k_steps = 10000 #250 #50000 #250 #5000 #2000 #50 #250
+    k_steps = 1000 #10000 #250 #50000 #250 #5000 #2000 #50 #250
     NB_REPEAT_K_MAX= 3 #10 #3 #15 #30
-    learning_rates = [0.01] #[0.01]#[0.1] #[0.001]#[0.00001] #[0.01] #[0.0001]
+    learning_rates = [0.1] #[0.01] #[0.01]#[0.1] #[0.001]#[0.00001] #[0.01] #[0.0001]
     fct_aux.N_DECIMALS = 8
     dico_phiname_ab = {"A1B1": {"a":1, "b":1}, "A1.2B0.8": {"a":1.2, "b":0.8}}
     dico_phiname_ab = {"A1B1": {"a":1, "b":1}}
@@ -234,11 +234,14 @@ if __name__ == "__main__":
     fct_aux.PI_0_PLUS_INIT = 4 #20 #4
     fct_aux.PI_0_MINUS_INIT = 3 #10 #3
     doc_VALUES = 24
-    NB_INSTANCES = 50
+    NB_INSTANCES = 10 #50
             
     
     algo_names = fct_aux.ALGO_NAMES_LRIx + fct_aux.ALGO_NAMES_DET \
                 + fct_aux.ALGO_NAMES_BF + fct_aux.ALGO_NAMES_NASH
+                
+    algo_names = [fct_aux.ALGO_NAMES_LRIx[1]] \
+                    + fct_aux.ALGO_NAMES_BF + fct_aux.ALGO_NAMES_NASH
             
     
             
@@ -248,6 +251,8 @@ if __name__ == "__main__":
     setA_m_players, setB_m_players, setC_m_players = 8, 4, 4                   # 16 players
     setA_m_players, setB_m_players, setC_m_players = 6, 3, 3                   # 12 players
     setA_m_players, setB_m_players, setC_m_players = 4, 3, 3                   # 10 players
+    #setA_m_players, setB_m_players, setC_m_players = 2, 2, 2                   # 6 players
+    #setA_m_players, setB_m_players, setC_m_players = 1, 1, 1                   # 3 players
                       
     scenario_name = "scenarioOnePeriod"
     scenario = None
@@ -303,12 +308,12 @@ if __name__ == "__main__":
             files_csv = os.listdir(path_2_dir)
             
             name_cols = [fct_aux.name_cols_CX["C1"], fct_aux.name_cols_CX["C2"], 
-                         fct_aux.name_cols_CX["C3"], fct_aux.name_cols_CX["C4"], 
-                         fct_aux.name_cols_CX["C5"], fct_aux.name_cols_CX["C6"], 
-                         fct_aux.name_cols_CX["C7"], 
-                         fct_aux.name_cols_CX["C9"], 
-                         fct_aux.name_cols_CX["check_C5_inf_C6"], 
-                         fct_aux.name_cols_CX["check_C7_inf_C6"] ] 
+                          fct_aux.name_cols_CX["C3"], fct_aux.name_cols_CX["C4"], 
+                          fct_aux.name_cols_CX["C5"], fct_aux.name_cols_CX["C6"], 
+                          fct_aux.name_cols_CX["C7"], 
+                          fct_aux.name_cols_CX["C9"], 
+                          fct_aux.name_cols_CX["check_C5_inf_C6"], 
+                          fct_aux.name_cols_CX["check_C7_inf_C6"] ] 
             df = pd.DataFrame(columns=name_cols)
             for file_csv in files_csv:
                 df_tmp = pd.read_csv(os.path.join(path_2_dir, file_csv), index_col=0)

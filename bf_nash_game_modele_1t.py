@@ -350,7 +350,10 @@ def generer_balanced_players_4_modes_profils(arr_pl_M_T_vars_modif,
                             m_players=m_players, t=t)
     print("possibles_modes={}".format(len(possibles_modes)))
     mode_profiles = it.product(*possibles_modes)
-        
+    
+    # TODO: to DELETE AFTER
+    dico_modprofil_b0cO_Perf_t = dict()
+    
     dico_nash = dict() # key=Perf_t, mode_profile
     
     Perf_ts_BF, Perf_ts_NH = list(), list()
@@ -362,11 +365,11 @@ def generer_balanced_players_4_modes_profils(arr_pl_M_T_vars_modif,
                                 fct_aux.AUTOMATE_INDEX_ATTRS["mode_i"]] \
             = mode_profile
         
-        arr_pl_Mtvars_mode_prof \
-            = balanced_player_game_4_mode_profil(
-                arr_pl_Mtvars_mode_prof=arr_pl_Mtvars_mode_prof, 
-                m_players=m_players, t=t,
-                dbg=dbg)
+        # arr_pl_Mtvars_mode_prof \
+        #     = balanced_player_game_4_mode_profil(
+        #         arr_pl_Mtvars_mode_prof=arr_pl_Mtvars_mode_prof.copy(), 
+        #         m_players=m_players, t=t,
+        #         dbg=dbg)
             
         # compute pi_sg_{plus,minus}_t, pi_0_{plus,minus}_t, b0_t, c0_t, ben_t, cst_t
         In_sg, Out_sg, b0_t, c0_t = None, None, None, None 
@@ -380,7 +383,7 @@ def generer_balanced_players_4_modes_profils(arr_pl_M_T_vars_modif,
         pi_sg_plus_t, pi_sg_minus_t, \
         dico_gamme_t \
             = fct_aux.balanced_player_game_t_4_mode_profil_prices_SG_4_notLearnAlgo(
-                    arr_pl_M_T_vars_modif=arr_pl_Mtvars_mode_prof,
+                    arr_pl_M_T_vars_modif=arr_pl_Mtvars_mode_prof.copy(),
                     mode_profile=mode_profile, t=t,
                     pi_hp_plus=pi_hp_plus, pi_hp_minus=pi_hp_minus, 
                     a=a, b=b,
@@ -404,7 +407,10 @@ def generer_balanced_players_4_modes_profils(arr_pl_M_T_vars_modif,
                 pi_0_plus_t=pi_0_plus_t, pi_0_minus_t=pi_0_minus_t, 
                 manual_debug=manual_debug, dbg=dbg)
         
-            
+        # TO DO: TO DELETE AFTER
+        dico_modprofil_b0cO_Perf_t[mode_profile]={"bO_t":round(b0_t,2), 
+                                                  "cO_t":round(c0_t,2),
+                                                  "Perf_t":Perf_t}
             
             
         dico_mode_prof_by_players = dict()
@@ -427,6 +433,9 @@ def generer_balanced_players_4_modes_profils(arr_pl_M_T_vars_modif,
                                         +"_t_"+str(t)
                                         +"_"+str(cpt_xxx)] \
                 = dico_vars
+            
+            dico_modprofil_b0cO_Perf_t[mode_profile]\
+                [fct_aux.RACINE_PLAYER+str(num_pl_i)] = dico_vars
         
         dico_mode_prof_by_players["bens_t"] = bens_t
         dico_mode_prof_by_players["csts_t"] = csts_t
@@ -473,6 +482,7 @@ def generer_balanced_players_4_modes_profils(arr_pl_M_T_vars_modif,
         bad_key_Perf_t_BF, mid_key_Perf_t_BF, best_key_Perf_t_BF))
     print("Perf_t NH: BAD={}, MIDDLE={}, BEST={}".format(
         bad_key_Perf_t_NH, mid_key_Perf_t_NH, best_key_Perf_t_NH))
+ 
     
     list_dico_modes_profs_by_players_t_bestBF \
         = dico_modes_profs_by_players_t_bestBF[best_key_Perf_t_BF]
@@ -488,13 +498,16 @@ def generer_balanced_players_4_modes_profils(arr_pl_M_T_vars_modif,
     list_dico_modes_profs_by_players_t_midNH \
         = dico_modes_profs_by_players_t_midNH[mid_key_Perf_t_NH]
         
+    set_Perf_ts_BF = set(Perf_ts_BF)
+        
     return list_dico_modes_profs_by_players_t_bestBF, \
             list_dico_modes_profs_by_players_t_badBF, \
             list_dico_modes_profs_by_players_t_midBF, \
             list_dico_modes_profs_by_players_t_bestNH, \
             list_dico_modes_profs_by_players_t_badNH, \
             list_dico_modes_profs_by_players_t_midNH, \
-            keys_best_BF_NH, keys_bad_BF_NH
+            keys_best_BF_NH, keys_bad_BF_NH, \
+            set_Perf_ts_BF, dico_modprofil_b0cO_Perf_t                          # TODO TO DELETE dico_modprofil_b0cO_Perf_t
         
 # ________       balanced players 4 all modes_profiles   ---> fin        ______
 
@@ -582,6 +595,8 @@ def checkout_nash_4_profils_by_OnePeriodt(arr_pl_Mtvars_modif_algo,
     cols = ["players", "nash_modes_t{}".format(t), 'states_t{}'.format(t), 
             'Vis_t{}'.format(t), 'Vis_bar_t{}'.format(t), 
                'res_t{}'.format(t)] 
+    
+    arr_pl_Mtvars_modif_algo = arr_pl_Mtvars_modif_algo.copy()
     
     id_players = list(range(0, m_players))
     df_nash_t = pd.DataFrame(index=id_players, columns=cols)
@@ -1111,9 +1126,10 @@ def bf_nash_game_model_1t_LOOK4BadBestMid(
                         list_dico_modes_profs_by_players_t_bestNH,
                         list_dico_modes_profs_by_players_t_badNH,
                         list_dico_modes_profs_by_players_t_midNH,
-                        keys_best_BF_NH, keys_bad_BF_NH,
+                        keys_best_BF_NH, keys_bad_BF_NH, set_Perf_ts_BF, dico_modprofil_b0cO_Perf_t,
                         pi_hp_plus_T, pi_hp_minus_T,
                         m_players, t_periods,
+                        arr_pl_M_T_vars_init,
                         arr_pl_MTvars_modif, t,
                         algos_BF_NH,
                         pi_hp_plus, 
@@ -1163,7 +1179,8 @@ def bf_nash_game_model_1t_LOOK4BadBestMid(
     
         dico_modes_profs_by_players_t = dict()    
     
-        print("*** algo_name={} *** ".format(algo_name))
+        print("\n *** algo_name={} *** ".format(algo_name))
+        
         
         list_dico_modes_profs_by_players_t = dict()
         
@@ -1257,12 +1274,12 @@ def bf_nash_game_model_1t_LOOK4BadBestMid(
                 arr_pl_Mtvars_algo[:,t,fct_aux.AUTOMATE_INDEX_ATTRS["state_i"]]))
         
         arr_pl_Mtvars_algo = balanced_player_game_4_mode_profil(
-                                arr_pl_Mtvars_mode_prof=arr_pl_Mtvars_algo, 
+                                arr_pl_Mtvars_mode_prof=arr_pl_Mtvars_algo.copy(), 
                                 m_players=m_players, t=t,
                                 dbg=dbg)
         
         ## test if there are the same values like these in dico_mode_prof_by_players_algo
-        test_same_values_dicoModeProfByPlayers(arr_pl_Mtvars_algo, 
+        test_same_values_dicoModeProfByPlayers(arr_pl_Mtvars_algo.copy(), 
                                                m_players, t, 
                                                pi_hp_plus, pi_hp_minus, 
                                                a, b, 
@@ -1280,10 +1297,10 @@ def bf_nash_game_model_1t_LOOK4BadBestMid(
             
         # checkout NASH equilibrium
         df_nash = None
-        bens_csts_M_t = bens_t - csts_t
+        bens_csts_M_t = bens_t - csts_t ; 
         df_nash = checkout_nash_4_profils_by_OnePeriodt(
                         arr_pl_Mtvars_algo.copy(),
-                        arr_pl_MTvars_modif,
+                        arr_pl_M_T_vars_init.copy(),
                         pi_hp_plus, pi_hp_minus, a, b,
                         pi_0_minus_t, pi_0_plus_t, 
                         bens_csts_M_t,
@@ -1291,6 +1308,16 @@ def bf_nash_game_model_1t_LOOK4BadBestMid(
                         t,
                         manual_debug,
                         dbg)
+        # df_nash = checkout_nash_4_profils_by_OnePeriodt(
+        #                 arr_pl_Mtvars_algo.copy(),
+        #                 arr_pl_MTvars_modif.copy(),
+        #                 pi_hp_plus, pi_hp_minus, a, b,
+        #                 pi_0_minus_t, pi_0_plus_t, 
+        #                 bens_csts_M_t,
+        #                 m_players,
+        #                 t,
+        #                 manual_debug,
+        #                 dbg)
         # if algo_name not in fct_aux.ALGO_NAMES_NASH:
         #     bens_csts_M_t = bens_t - csts_t
         #     df_nash = checkout_nash_4_profils_by_OnePeriodt(
@@ -1325,7 +1352,8 @@ def bf_nash_game_model_1t_LOOK4BadBestMid(
         dico_modes_profs_by_players_t[t] = dico_mode_prof_by_players_algo
         #___________ update saving variables : fin   ______________________
         
-        print("Sis = {}".format(arr_pl_MTvars_modif[:,t,fct_aux.AUTOMATE_INDEX_ATTRS["Si"]]))
+        print("Sis_modif = {}".format(arr_pl_MTvars_modif[:,t,fct_aux.AUTOMATE_INDEX_ATTRS["Si"]]))
+        print("Apres exec: Sis_modif_tvars_algo = {}".format(arr_pl_Mtvars_algo[:,t,fct_aux.AUTOMATE_INDEX_ATTRS["Si"]]))
         print("----- t={} After running free memory={}% ------ ".format(
             t, list(psutil.virtual_memory())[2]))
         
@@ -1335,7 +1363,7 @@ def bf_nash_game_model_1t_LOOK4BadBestMid(
         B_is_M_T_algo, C_is_M_T_algo, BB_is_M_T_algo, CC_is_M_T_algo, \
         EB_is_M_T_algo \
             = fct_aux.compute_prices_B_C_BB_CC_EB_DET(
-                    arr_pl_M_T_vars_modif=arr_pl_Mtvars_algo, 
+                    arr_pl_M_T_vars_modif=arr_pl_Mtvars_algo.copy(), 
                     pi_sg_minus_T=pi_sg_minus_T_algo, pi_sg_plus_T=pi_sg_plus_T_algo, 
                     pi_0_minus_T=pi_0_minus_T_algo, pi_0_plus_T=pi_0_plus_T_algo,
                     b0_s_T=b0_ts_T_algo, c0_s_T=c0_ts_T_algo)
@@ -1347,7 +1375,6 @@ def bf_nash_game_model_1t_LOOK4BadBestMid(
         #_______      save computed variables locally from algo_name     __________
         msg = "pi_hp_plus_"+str(pi_hp_plus)+"_pi_hp_minus_"+str(pi_hp_minus)
         
-        print("path_to_save={}".format(path_to_save))
         if "simu_DDMM_HHMM" in path_to_save:
             path_to_save = os.path.join(name_dir, "simu_"+date_hhmm,
                                         msg, algo_name
@@ -1356,6 +1383,7 @@ def bf_nash_game_model_1t_LOOK4BadBestMid(
         #     path_to_save = os.path.join(name_dir, "simu_"+date_hhmm,
         #                                 msg, algo_name
         #                                 )
+        print("path_to_save={}".format(path_to_save))
         
         Path(path_to_save).mkdir(parents=True, exist_ok=True)
         # df_nash.to_excel(os.path.join(
@@ -1366,7 +1394,9 @@ def bf_nash_game_model_1t_LOOK4BadBestMid(
                     *[path_to_save,
                       "resume_verify_Nash_equilibrium_{}.csv".format(algo_name)]), 
                     index=False)
-    
+        
+        np.save(os.path.join(path_to_save, "arr_pl_M_T_K_vars_init.npy"), 
+                arr_pl_M_T_vars_init)
         fct_aux.save_variables(
                 path_to_save=path_to_save, 
                 arr_pl_M_T_K_vars=arr_pl_Mtvars_algo, 
@@ -1384,7 +1414,22 @@ def bf_nash_game_model_1t_LOOK4BadBestMid(
                 dico_stats_res=dico_modes_profs_by_players_t, 
                 algo=algo_name, 
                 dico_best_steps=dict())
-    
+        
+        # save solutions found in algo_name
+        dico_key_dico = dict()
+        for tu_key_dico in list_dico_modes_profs_by_players_t:
+            tu_key_dico[1]["set_all_Perf_t"] = set_Perf_ts_BF
+            tu_key_dico[1]["modprofil_b0cO_Perf_t"] = dico_modprofil_b0cO_Perf_t
+            dico_key_dico[tu_key_dico[0]] = tu_key_dico[1]
+        pd.DataFrame(dico_key_dico).to_csv(os.path.join(
+                    *[path_to_save,
+                      "resume_solutions_{}.csv".format(algo_name)]), 
+                    index=True)
+        
+    dico_profils_NH["nb_profils"] = set(dico_best_profils_NH["profils"])\
+                                    .union( set(dico_bad_profils_NH["profils"])\
+                                           .union(set(dico_mid_profils_NH["profils"])))
+                                        
     return dico_profils_BF, dico_profils_NH, \
             dico_best_profils_BF, dico_bad_profils_BF, dico_mid_profils_BF, \
             dico_best_profils_NH, dico_bad_profils_NH, dico_mid_profils_NH
@@ -1483,6 +1528,184 @@ def test_BF_NASH_balanced_player_game():
     #     check_C7_inf_C6 = "NOK"
     # return
     
+def test_BF_NASH_balanced_player_game_scenario1_setA1setB1setC1():
+    fct_aux.N_DECIMALS = 8
+    a, b = 1, 1
+    pi_hp_plus = 10 #0.2*pow(10,-3) #[5, 15]
+    pi_hp_minus = 30 #0.33 #[15, 5]
+    
+    manual_debug = False
+    gamma_version = -2  #-2,-1,1,2,3,4,5
+    debug = False
+    criteria_bf = "Perf_t"
+    used_instances = True #False#True
+    
+    t_periods = 1
+    
+    path_2_arr_pl_setABC1 = os.path.join("tests", "AUTOMATE_INSTANCES_GAMES")
+    path_file_2_arr_pl = os.path.join(path_2_arr_pl_setABC1,
+                        "arr_pl_M_T_players_setA_1_setB_1_setC_1_periods_1_scenarioOnePeriod.npy")
+    arr_pl_M_T_vars_init = np.load(path_file_2_arr_pl, allow_pickle=True)
+    algo_names = fct_aux.ALGO_NAMES_BF + fct_aux.ALGO_NAMES_NASH
+    
+    
+    path_2_arr_pl_setABC_scen1 = os.path.join("tests","A1B1OnePeriod_50instances_ksteps100_b0.1_kstoplearn0.9",
+                                         "OnePeriod_10instancesGammaV-2",
+                                         "simu_DDMM_HHMM_6_t_1",
+                                         "pi_hp_plus_10_pi_hp_minus_30",
+                                         "BEST-BRUTE-FORCE")
+    path_file_2_arr_pl = os.path.join(path_2_arr_pl_setABC_scen1,
+                                      "arr_pl_M_T_K_vars_init.npy")
+    arr_pl_M_T_vars_init = np.load(path_file_2_arr_pl, allow_pickle=True)
+    algo_names = fct_aux.ALGO_NAMES_BF + fct_aux.ALGO_NAMES_NASH
+    
+    
+    global MOD
+    m_players =arr_pl_M_T_vars_init.shape[0]
+    MOD = int(0.10*pow(2, m_players)) \
+            if pow(2, m_players) < 65000 \
+            else int(0.020*pow(2, m_players))
+    MOD = 1 if MOD == 0 else MOD
+    
+    name_simu = "BF_NASH_simu_"+datetime.now().strftime("%d%m_%H%M")
+    path_to_save = os.path.join("tests", name_simu)
+    
+    dico_profils_BF, dico_profils_NH, \
+    dico_best_profils_BF, dico_bad_profils_BF, dico_mid_profils_BF, \
+    dico_best_profils_NH, dico_bad_profils_NH, dico_mid_profils_NH \
+       = BF_NASH_balanced_player_game(
+            arr_pl_M_T_vars_init=arr_pl_M_T_vars_init.copy(), 
+            algo_names=algo_names,
+            pi_hp_plus=pi_hp_plus, 
+            pi_hp_minus=pi_hp_minus,
+            a=a, b=b,
+            gamma_version=gamma_version,
+            path_to_save=path_to_save, 
+            name_dir="tests", 
+            date_hhmm="DDMM_HHMM",
+            manual_debug=manual_debug, 
+            criteria_bf=criteria_bf, dbg=debug)
+    
+    
+    C1 = True if dico_profils_NH["nb_profils"] > 0 else False
+    C6s = dico_best_profils_BF["Perfs"] if dico_best_profils_BF["nb_best_profils"] > 0 else []
+    C9s = dico_bad_profils_BF["Perfs"] if dico_bad_profils_BF["nb_bad_profils"] > 0 else []
+    C7s_bad, C7s_best = [], []
+    if C1:
+       C7s_bad = dico_bad_profils_NH["Perfs"] if dico_bad_profils_NH["nb_bad_profils"] > 0 else []
+       C7s_best = dico_best_profils_NH["Perfs"] if dico_best_profils_NH["nb_best_profils"] > 0 else []
+       
+    print("C1 = {}".format(C1))
+    print("C6s={}, C9s={}".format(len(C6s), len(C9s) ))
+    print("C7s_bad={}, C7s_best={}".format(len(C7s_bad), len(C7s_best) ))
+
+
+def test_generer_balanced_players_4_modes_profils():
+    setA_m_players, setB_m_players, setC_m_players = 1, 1, 1                   # 3 players
+                      
+    scenario_name = "scenarioOnePeriod"
+    scenario = None
+    
+    name_dir = "tests"
+    path_to_arr_pl_M_T = os.path.join(*[name_dir, "AUTOMATE_INSTANCES_GAMES"])    
+    fct_aux.N_DECIMALS = 8
+    a, b = 1, 1
+    pi_hp_plus = 10 #0.2*pow(10,-3) #[5, 15]
+    pi_hp_minus = 30 #0.33 #[15, 5]
+    
+    manual_debug = False
+    gamma_version = -2  #-2,-1,1,2,3,4,5
+    debug = False
+    criteria_bf = "Perf_t"
+    used_instances = True #False#True
+    
+    pi_0_plus_t = fct_aux.PI_0_PLUS_INIT #4
+    pi_0_minus_t = fct_aux.PI_0_MINUS_INIT #3
+    
+    t_periods = 1
+    
+    arr_pl_M_T_vars_init, arr_pl_MTvars_modif = None, None
+    boolean_self = True 
+    while boolean_self:
+        arr_pl_M_T_vars_init \
+            = fct_aux.get_or_create_instance_Pi_Ci_one_period_doc24(
+                setA_m_players, setB_m_players, setC_m_players, 
+                t_periods, 
+                scenario,
+                scenario_name,
+                path_to_arr_pl_M_T, 
+                used_instances)
+        pi_hp_plus_T, pi_hp_minus_T, \
+        phi_hp_plus_T, phi_hp_minus_T \
+            = fct_aux.compute_pi_phi_HP_minus_plus_all_t(
+                arr_pl_M_T_vars_init=arr_pl_M_T_vars_init,
+                t_periods=t_periods,
+                pi_hp_plus=pi_hp_plus,
+                pi_hp_minus=pi_hp_minus,
+                a=a,
+                b=b, 
+                gamma_version=gamma_version, 
+                manual_debug=manual_debug,
+                dbg=debug)
+            
+        t = 0
+        
+        pi_hp_plus_t = pi_hp_plus_T[t]
+        pi_hp_minus_t = pi_hp_minus_T[t]
+        arr_pl_MTvars_modif = fct_aux.compute_gamma_state_4_period_t(
+                                    arr_pl_M_T_K_vars=arr_pl_M_T_vars_init.copy(), 
+                                    t=t, 
+                                    pi_0_plus=pi_0_plus_t, pi_0_minus=pi_0_minus_t,
+                                    pi_hp_plus_t=pi_hp_plus_t, 
+                                    pi_hp_minus_t=pi_hp_minus_t,
+                                    gamma_version=gamma_version,
+                                    manual_debug=manual_debug,
+                                    dbg=debug)
+        if "Self" in arr_pl_MTvars_modif[:,t, 
+                                             fct_aux.AUTOMATE_INDEX_ATTRS["state_i"]]:
+            boolean_self = False
+        
+    avant_state_Siold_Sis = arr_pl_MTvars_modif[:, t, 
+                            [fct_aux.AUTOMATE_INDEX_ATTRS["state_i"], 
+                             fct_aux.AUTOMATE_INDEX_ATTRS["Si_old"], 
+                             fct_aux.AUTOMATE_INDEX_ATTRS["Si"]
+                             ]]
+    
+    m_players = arr_pl_MTvars_modif.shape[0]
+    
+    list_dico_modes_profs_by_players_t_bestBF = list()
+    list_dico_modes_profs_by_players_t_badBF = list()
+    list_dico_modes_profs_by_players_t_midBF = list()
+    list_dico_modes_profs_by_players_t_bestNH = list()
+    list_dico_modes_profs_by_players_t_badNH = list()
+    list_dico_modes_profs_by_players_t_midNH = list()
+    
+    list_dico_modes_profs_by_players_t_bestBF, \
+    list_dico_modes_profs_by_players_t_badBF, \
+    list_dico_modes_profs_by_players_t_midBF, \
+    list_dico_modes_profs_by_players_t_bestNH, \
+    list_dico_modes_profs_by_players_t_badNH, \
+    list_dico_modes_profs_by_players_t_midNH, \
+    keys_best_BF_NH, keys_bad_BF_NH, \
+    set_Perf_ts_BF, dico_modprofil_b0cO_Perf_t \
+            = generer_balanced_players_4_modes_profils(
+                arr_pl_MTvars_modif.copy(), 
+                m_players, t,
+                pi_hp_plus, pi_hp_minus,
+                a, b,
+                pi_0_plus_t, pi_0_minus_t,
+                manual_debug, debug)
+    
+    apres_state_Siold_Sis = arr_pl_MTvars_modif[:, t, 
+                            [fct_aux.AUTOMATE_INDEX_ATTRS["state_i"], 
+                             fct_aux.AUTOMATE_INDEX_ATTRS["Si_old"], 
+                             fct_aux.AUTOMATE_INDEX_ATTRS["Si"]
+                             ]]
+    
+    print("State_Siold_Si avant :{}, \n apres:{}".format(avant_state_Siold_Sis, 
+                                                      apres_state_Siold_Sis))
+    
+    return arr_pl_MTvars_modif, list_dico_modes_profs_by_players_t_bestBF
 
 ###############################################################################
 #                   Execution
@@ -1491,6 +1714,8 @@ def test_BF_NASH_balanced_player_game():
 if __name__ == "__main__":
     ti = time.time()
     
-    test_BF_NASH_balanced_player_game()
+    #test_BF_NASH_balanced_player_game()
+    #test_BF_NASH_balanced_player_game_scenario1_setA1setB1setC1()
+    arr, dico_bestBF = test_generer_balanced_players_4_modes_profils()
     
     print("runtime = {}".format(time.time() - ti))

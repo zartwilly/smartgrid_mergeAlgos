@@ -71,7 +71,12 @@ RACINE_PLAYER = "player"
 name_cols_CX = {"C1":"C1", "C2":"C2", "C3":"C3", "C4":"C4", 
                 "C5":"C5", "C6":"C6", "C7":"C7", "C9":"C9",
                 "check_C5_inf_C6":"check_C5_inf_C6", 
-                "check_C7_inf_C6":"check_C7_inf_C6"}
+                "check_C7_inf_C6":"check_C7_inf_C6", 
+                "mean_proba_players":"mean_proba_players", 
+                "nb_players_proba_inf_{}".format(STOP_LEARNING_PROBA):\
+                    "nb_players_proba_inf_{}".format(STOP_LEARNING_PROBA),
+                "players_proba_inf_{}".format(STOP_LEARNING_PROBA):\
+                    "players_proba_inf_{}".format(STOP_LEARNING_PROBA)}
 
 #_________________            AUTOMATE CONSTANCES           ________________
 

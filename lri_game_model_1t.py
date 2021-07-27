@@ -1095,11 +1095,11 @@ def turn_dico_stats_res_into_df_LRI(arr_pl_MTKvars_modif, t_periods,
         
         
     df = pd.DataFrame.from_dict(dico_players, orient="columns")
-    #df.to_csv(os.path.join( *[path_to_save, algo_name+"_"+"dico.csv"]))
-    df.to_excel(os.path.join(
-                *[path_to_save,
-                  "{}_dico.xlsx".format(algo_name)]), 
-                index=True )
+    df.to_csv(os.path.join( *[path_to_save, algo_name+"_"+"dico.csv"]))
+    # df.to_excel(os.path.join(
+    #             *[path_to_save,
+    #               "{}_dico.xlsx".format(algo_name)]), 
+    #             index=True )
     
     return df
 # ______________   turn dico stats into df  -->  fin    ______________________
@@ -1560,6 +1560,7 @@ def lri_balanced_player_game_all_pijk_upper_08_onePeriod(
     
     ## select modes and compute ben,cst at k_stop_learning
     k_stop_learning = k-1 #if k < k_steps else k_steps-1
+    print("Sis_modif = {}".format(arr_pl_MTKvars_modif[:,t,k_stop_learning,fct_aux.AUTOMATE_INDEX_ATTRS["Si"]]))
     dico_k_stop_learnings[t] = {"k_stop":k_stop_learning}
     arr_pl_MTKvars_modif \
         = update_profile_players_by_select_mode_from_S1orS2_p_i_j_k(
@@ -1605,6 +1606,14 @@ def lri_balanced_player_game_all_pijk_upper_08_onePeriod(
     print("******* t = {} END: k_step = {}, nb_repeat_k={} *******".format(
         t, k_stop_learning, nb_max_reached_repeat_k_per_t))
     
+    # found some indicators' values
+    count_players, max_probas_inf_maxlearningrate_LRIX, mean_proba_LRIX, \
+    count_players_S1_sup_maxlearningrate, \
+    count_players_S2_sup_maxlearningrate \
+        = count_players_sup_stoplearningproba(
+            arr_pl_MTKvars_modif=arr_pl_MTKvars_modif, 
+            t=t, k=k_stop_learning)
+    
     ## checkout NASH equilibrium    
     # ben_csts_M_t_kstop : shape (m_players,)
     ben_csts_M_t_kstop = BENs_M_T_K[:,t,k_stop_learning] \
@@ -1612,7 +1621,7 @@ def lri_balanced_player_game_all_pijk_upper_08_onePeriod(
     df_nash_t = None
     df_nash_t = checkout_nash_4_profils_by_periods(
                     arr_pl_MTKvars_modif.copy(),
-                    arr_pl_MTKvars,
+                    arr_pl_MTKvars.copy(),
                     pi_hp_plus, pi_hp_minus, 
                     a, b,
                     pi_0_minus_t, pi_0_plus_t, 
@@ -1630,7 +1639,7 @@ def lri_balanced_player_game_all_pijk_upper_08_onePeriod(
     B_is_M, C_is_M, BB_is_M, CC_is_M, EB_is_M, \
     B_is_M_T, C_is_M_T, BB_is_M_T, CC_is_M_T, EB_is_M_T, \
     B_is_MT, C_is_MT \
-        = compute_prices_B_C_BB_CC_EB_LRI(arr_pl_MTKvars_modif, 
+        = compute_prices_B_C_BB_CC_EB_LRI(arr_pl_MTKvars_modif.copy(), 
                                           dico_k_stop_learnings,
                                           pi_sg_minus_T, pi_sg_plus_T, 
                                           pi_0_minus_T, pi_0_plus_T,
@@ -1696,7 +1705,7 @@ def lri_balanced_player_game_all_pijk_upper_08_onePeriod(
             dico_best_steps=dico_k_stop_learnings)
     
     df = turn_dico_stats_res_into_df_LRI(
-            arr_pl_MTKvars_modif = arr_pl_MTKvars_modif, 
+            arr_pl_MTKvars_modif = arr_pl_MTKvars_modif.copy(), 
             t_periods = t_periods,
             BENs_M_T_K = BENs_M_T_K, 
             CSTs_M_T_K = CSTs_M_T_K,
@@ -1715,7 +1724,7 @@ def lri_balanced_player_game_all_pijk_upper_08_onePeriod(
     # _____         checkout prices from computing variables: debut      _____7
     dbg=True
     if dbg:
-        checkout_prices_B_C_BB_CC_EB_LRI(arr_pl_MTKvars_modif, 
+        checkout_prices_B_C_BB_CC_EB_LRI(arr_pl_MTKvars_modif.copy(), 
                                         dico_k_stop_learnings,
                                         path_to_save)
     # _____         checkout prices from computing variables: fin        _____
@@ -1733,7 +1742,8 @@ def lri_balanced_player_game_all_pijk_upper_08_onePeriod(
     
     return arr_pl_MTKvars_modif, profils_stabilisation_LRIx, \
             k_stop_learning_LRIx, bool_equilibrium_nash_LRIx, \
-            Perf_sum_Vi_LRIx
+            Perf_sum_Vi_LRIx, \
+            mean_proba_LRIX, max_probas_inf_maxlearningrate_LRIX
     
     
 
@@ -1984,9 +1994,9 @@ if __name__ == "__main__":
     # Perf_sum_Vi_LRIx  \
     #     = test_lri_balanced_player_game_all_pijk_upper_08_onePeriod_doc2324_scenario123()
         
-    learning_rate = 0.1; k_steps = 250 #100
+    # learning_rate = 0.1; k_steps = 250 #100
     # learning_rate = 0.1; k_steps = 10000
-    # learning_rate = 0.01; k_steps = 50000
+    learning_rate = 0.01; k_steps = 50000
     arr_pl_MTKvars_modif, profils_stabilisation_LRIx, \
     k_stop_learning_LRIx, bool_equilibrium_nash_LRIx, \
     Perf_sum_Vi_LRIx  \
