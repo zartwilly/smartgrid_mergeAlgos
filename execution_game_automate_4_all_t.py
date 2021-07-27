@@ -168,7 +168,7 @@ def execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(arr_pl_M_T_vars
         list_dico_modes_profs_by_players_t_badNH, \
         list_dico_modes_profs_by_players_t_midNH, \
         keys_best_BF_NH, keys_bad_BF_NH, \
-        set_Perf_ts_BF, dico_modprofil_b0cO_Perf_t \
+        set_Perf_ts_BF \
                 = bfNhGameModel.generer_balanced_players_4_modes_profils(
                     arr_pl_MTvars_modif.copy(), 
                     m_players, t,
@@ -202,11 +202,6 @@ def execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(arr_pl_M_T_vars
                 algos_BF_NH = look4BF_NH(algos)
                 boolean_BF_NH = False
                     
-                # print("avant exec Si={}".format(arr_pl_MTvars_modif_BF_NH[:,:,fct_aux.AUTOMATE_INDEX_ATTRS["Si"]]))
-                # arr_pl_MTvars_modif_BF_NH[:,:,fct_aux.AUTOMATE_INDEX_ATTRS["Si"]] \
-                #     = arr_pl_M_T_vars_init[:,:,fct_aux.AUTOMATE_INDEX_ATTRS["Si"]]
-                # print("apres exec Si={}".format(arr_pl_MTvars_modif_BF_NH[:,:,fct_aux.AUTOMATE_INDEX_ATTRS["Si"]]))
-                
                 
                 dico_profils_BF, dico_profils_NH, \
                 dico_best_profils_BF, dico_bad_profils_BF, dico_mid_profils_BF, \
@@ -219,7 +214,7 @@ def execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(arr_pl_M_T_vars
                         list_dico_modes_profs_by_players_t_badNH,
                         list_dico_modes_profs_by_players_t_midNH,
                         keys_best_BF_NH, keys_bad_BF_NH, 
-                        set_Perf_ts_BF, dico_modprofil_b0cO_Perf_t,             # TODO TO DELETE dico_modprofil_b0cO_Perf_t
+                        set_Perf_ts_BF, 
                         pi_hp_plus_T, pi_hp_minus_T, 
                         m_players, t_periods,
                         arr_pl_M_T_vars_init=arr_pl_M_T_vars_init.copy(),
@@ -328,11 +323,11 @@ def execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(arr_pl_M_T_vars
       
     
         print("profils_stabilisation_LRI2={}, profils_NH={}, nb_best_profils_bf={}".format(
-                profils_stabilisation_LRI2,
+                len(profils_stabilisation_LRI2),
                 dico_profils_NH["nb_profils"], 
                 nb_best_profils_bf  ))
         
-        profils_NH = dico_profils_NH["nb_profils"]
+        profils_NH = dico_profils_NH["profils"]
         C1 = True if len(profils_NH) > 0 else False
         C2 = True if k_stop_learning_LRI2 < k_steps else False
         C4 = k_stop_learning_LRI2 if C2 else None

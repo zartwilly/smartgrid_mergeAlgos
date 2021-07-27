@@ -351,9 +351,6 @@ def generer_balanced_players_4_modes_profils(arr_pl_M_T_vars_modif,
     print("possibles_modes={}".format(len(possibles_modes)))
     mode_profiles = it.product(*possibles_modes)
     
-    # TODO: to DELETE AFTER
-    dico_modprofil_b0cO_Perf_t = dict()
-    
     dico_nash = dict() # key=Perf_t, mode_profile
     
     Perf_ts_BF, Perf_ts_NH = list(), list()
@@ -406,11 +403,6 @@ def generer_balanced_players_4_modes_profils(arr_pl_M_T_vars_modif,
                 pi_hp_plus=pi_hp_plus, pi_hp_minus=pi_hp_minus, a=a, b=b,
                 pi_0_plus_t=pi_0_plus_t, pi_0_minus_t=pi_0_minus_t, 
                 manual_debug=manual_debug, dbg=dbg)
-        
-        # TO DO: TO DELETE AFTER
-        dico_modprofil_b0cO_Perf_t[mode_profile]={"bO_t":round(b0_t,2), 
-                                                  "cO_t":round(c0_t,2),
-                                                  "Perf_t":Perf_t}
             
             
         dico_mode_prof_by_players = dict()
@@ -433,9 +425,6 @@ def generer_balanced_players_4_modes_profils(arr_pl_M_T_vars_modif,
                                         +"_t_"+str(t)
                                         +"_"+str(cpt_xxx)] \
                 = dico_vars
-            
-            dico_modprofil_b0cO_Perf_t[mode_profile]\
-                [fct_aux.RACINE_PLAYER+str(num_pl_i)] = dico_vars
         
         dico_mode_prof_by_players["bens_t"] = bens_t
         dico_mode_prof_by_players["csts_t"] = csts_t
@@ -507,8 +496,8 @@ def generer_balanced_players_4_modes_profils(arr_pl_M_T_vars_modif,
             list_dico_modes_profs_by_players_t_badNH, \
             list_dico_modes_profs_by_players_t_midNH, \
             keys_best_BF_NH, keys_bad_BF_NH, \
-            set_Perf_ts_BF, dico_modprofil_b0cO_Perf_t                          # TODO TO DELETE dico_modprofil_b0cO_Perf_t
-        
+            set_Perf_ts_BF
+            
 # ________       balanced players 4 all modes_profiles   ---> fin        ______
 
 
@@ -1126,7 +1115,7 @@ def bf_nash_game_model_1t_LOOK4BadBestMid(
                         list_dico_modes_profs_by_players_t_bestNH,
                         list_dico_modes_profs_by_players_t_badNH,
                         list_dico_modes_profs_by_players_t_midNH,
-                        keys_best_BF_NH, keys_bad_BF_NH, set_Perf_ts_BF, dico_modprofil_b0cO_Perf_t,
+                        keys_best_BF_NH, keys_bad_BF_NH, set_Perf_ts_BF,
                         pi_hp_plus_T, pi_hp_minus_T,
                         m_players, t_periods,
                         arr_pl_M_T_vars_init,
@@ -1419,16 +1408,16 @@ def bf_nash_game_model_1t_LOOK4BadBestMid(
         dico_key_dico = dict()
         for tu_key_dico in list_dico_modes_profs_by_players_t:
             tu_key_dico[1]["set_all_Perf_t"] = set_Perf_ts_BF
-            tu_key_dico[1]["modprofil_b0cO_Perf_t"] = dico_modprofil_b0cO_Perf_t
             dico_key_dico[tu_key_dico[0]] = tu_key_dico[1]
         pd.DataFrame(dico_key_dico).to_csv(os.path.join(
                     *[path_to_save,
                       "resume_solutions_{}.csv".format(algo_name)]), 
                     index=True)
         
-    dico_profils_NH["nb_profils"] = set(dico_best_profils_NH["profils"])\
+    dico_profils_NH["profils"] = set(dico_best_profils_NH["profils"])\
                                     .union( set(dico_bad_profils_NH["profils"])\
                                            .union(set(dico_mid_profils_NH["profils"])))
+    dico_profils_NH["nb_profils"] = len(dico_profils_NH["profils"])
                                         
     return dico_profils_BF, dico_profils_NH, \
             dico_best_profils_BF, dico_bad_profils_BF, dico_mid_profils_BF, \
