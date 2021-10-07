@@ -467,10 +467,14 @@ def generer_balanced_players_4_modes_profils(arr_pl_M_T_vars_modif,
                         list(psutil.virtual_memory())[2]    )) \
                 if cpt_xxx % MOD ==0 else None
                     
-    print("Perf_t BF: BAD={}, MIDDLE={}, BEST={}".format(
-        bad_key_Perf_t_BF, mid_key_Perf_t_BF, best_key_Perf_t_BF))
-    print("Perf_t NH: BAD={}, MIDDLE={}, BEST={}".format(
-        bad_key_Perf_t_NH, mid_key_Perf_t_NH, best_key_Perf_t_NH))
+    print("Perf_t BF: BAD={}->len:{}, MIDDLE={}->len:{}, BEST={}->len:{}".format(
+        bad_key_Perf_t_BF, len(dico_modes_profs_by_players_t_badBF), 
+        mid_key_Perf_t_BF, len(dico_modes_profs_by_players_t_midBF), 
+        best_key_Perf_t_BF, len(dico_modes_profs_by_players_t_bestBF)))
+    print("Perf_t NH: BAD={}->len:{}, MIDDLE={}->len:{}, BEST={}->len:{}".format(
+        bad_key_Perf_t_NH, len(dico_modes_profs_by_players_t_badNH),
+        mid_key_Perf_t_NH, len(dico_modes_profs_by_players_t_midNH), 
+        best_key_Perf_t_NH, len(dico_modes_profs_by_players_t_bestNH)))
  
     
     list_dico_modes_profs_by_players_t_bestBF \
@@ -481,11 +485,14 @@ def generer_balanced_players_4_modes_profils(arr_pl_M_T_vars_modif,
         = dico_modes_profs_by_players_t_midBF[mid_key_Perf_t_BF]
         
     list_dico_modes_profs_by_players_t_bestNH \
-        = dico_modes_profs_by_players_t_bestNH[best_key_Perf_t_NH]
+        = dico_modes_profs_by_players_t_bestNH[best_key_Perf_t_NH] \
+            if len(dico_modes_profs_by_players_t_bestNH) != 0 else []
     list_dico_modes_profs_by_players_t_badNH \
-        = dico_modes_profs_by_players_t_badNH[bad_key_Perf_t_NH]
+        = dico_modes_profs_by_players_t_badNH[bad_key_Perf_t_NH] \
+            if len(dico_modes_profs_by_players_t_badNH) != 0 else []
     list_dico_modes_profs_by_players_t_midNH \
-        = dico_modes_profs_by_players_t_midNH[mid_key_Perf_t_NH]
+        = dico_modes_profs_by_players_t_midNH[mid_key_Perf_t_NH] \
+            if len(dico_modes_profs_by_players_t_midNH) != 0 else []
         
     set_Perf_ts_BF = set(Perf_ts_BF)
         
