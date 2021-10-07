@@ -917,8 +917,11 @@ def checkout_nash_4_profils_by_periods(arr_pl_MTKvars_modif,
     df_nash_t = pd.DataFrame(index=id_players, columns=cols)
     
     # revert Si to the initial value ie at t and k=0
+    # Sis = arr_pl_M_T_K_vars[
+    #                     :, t, k_stop_learning, 
+    #                     fct_aux.AUTOMATE_INDEX_ATTRS["Si"]]
     Sis = arr_pl_M_T_K_vars[
-                        :, t, k_stop_learning, 
+                        :, t, 0, 
                         fct_aux.AUTOMATE_INDEX_ATTRS["Si"]]
     arr_pl_MTKvars_modif[
                     :, t, k_stop_learning, 
