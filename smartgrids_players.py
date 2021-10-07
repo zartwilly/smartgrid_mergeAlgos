@@ -469,7 +469,7 @@ class Player:
         elif self.mode_i == "PROD":
             self.r_i = 0 #self.Si
         elif self.mode_i == "DIS" and self.state_i ==  fct_aux.STATES[1]:
-            self.r_i = self.Si - (self.Ci - self.Pi)
+            self.r_i = 0 #self.Si - (self.Ci - self.Pi)
         elif self.mode_i == "DIS" and self.state_i ==  fct_aux.STATES[2]:
             self.r_i = min(self.Si_max - self.Si, self.Pi - self.Ci)
         
