@@ -467,7 +467,7 @@ class Player:
         elif self.mode_i == "CONS-":
             self.r_i = self.Si
         elif self.mode_i == "PROD":
-            self.r_i = self.Si
+            self.r_i = 0 #self.Si
         elif self.mode_i == "DIS" and self.state_i ==  fct_aux.STATES[1]:
             self.r_i = self.Si - (self.Ci - self.Pi)
         elif self.mode_i == "DIS" and self.state_i ==  fct_aux.STATES[2]:
