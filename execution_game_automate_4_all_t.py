@@ -51,6 +51,7 @@ def execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(arr_pl_M_T_vars
                                             pi_hp_plus_T=None, pi_hp_minus_T=None,
                                             phi_hp_plus_T=None, phi_hp_minus_T=None,
                                             gamma_version=1,
+                                            ppi_t_base=None,
                                             used_instances=True,
                                             used_storage_det=True,
                                             manual_debug=False, 
@@ -136,6 +137,7 @@ def execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(arr_pl_M_T_vars
                                 pi_hp_plus_t=pi_hp_plus_t, 
                                 pi_hp_minus_t=pi_hp_minus_t,
                                 gamma_version=gamma_version,
+                                ppi_t_base=ppi_t_base,
                                 manual_debug=manual_debug,
                                 dbg=dbg)               
         
