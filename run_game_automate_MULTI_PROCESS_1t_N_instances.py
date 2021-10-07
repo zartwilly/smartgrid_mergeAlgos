@@ -118,6 +118,17 @@ def define_parameters_MULTI_gammaV_instances_phiname_arrplMTVars(dico_params):
                             dico_params["scenario_name"],
                             dico_params["path_to_arr_pl_M_T"], 
                             dico_params["used_instances"])
+                elif dico_params["doc_VALUES"]==25:
+                    arr_pl_M_T_vars_init \
+                        = fct_aux.get_or_create_instance_Pi_Ci_one_period_doc25(
+                            dico_params["setA_m_players"], 
+                            dico_params["setB_m_players"], 
+                            dico_params["setC_m_players"], 
+                            dico_params["t_periods"], 
+                            dico_params["scenario"],
+                            dico_params["scenario_name"],
+                            dico_params["path_to_arr_pl_M_T"], 
+                            dico_params["used_instances"])
                     
                 pi_hp_plus_T, pi_hp_minus_T, \
                 phi_hp_plus_T, phi_hp_minus_T \
@@ -149,6 +160,7 @@ def define_parameters_MULTI_gammaV_instances_phiname_arrplMTVars(dico_params):
                          pi_hp_plus_T, pi_hp_minus_T,
                          phi_hp_plus_T, phi_hp_minus_T,
                          gamma_version,
+                         dico_params["ppi_t_base"],
                          dico_params["used_instances"],
                          dico_params["used_storage_det"],
                          dico_params["manual_debug"], 
@@ -180,13 +192,13 @@ def run_procedurale_way(params):
         b = param[10]
         pi_hp_plus_T = param[11]; pi_hp_minus_T = param[12]
         phi_hp_plus_T = param[13]; phi_hp_minus_T = param[14]
-        gamma_version = param[15]
-        used_instances = param[16]
-        used_storage_det = param[17]
-        manual_debug = param[18]
-        criteria_bf = param[19] 
-        numero_instance = param[20]
-        debug = param[21] 
+        gamma_version = param[15]; ppi_t_base = param[16]
+        used_instances = param[17]
+        used_storage_det = param[18]
+        manual_debug = param[19]
+        criteria_bf = param[20] 
+        numero_instance = param[21]
+        debug = param[22] 
         autoExeGame4T\
             .execute_BF_NH_LRI_OnePeriod_used_Generated_N_INSTANCES_MULTI(
                 arr_pl_M_T_vars_init=param[0],
@@ -203,12 +215,13 @@ def run_procedurale_way(params):
                 pi_hp_plus_T=param[11], pi_hp_minus_T=param[12],
                 phi_hp_plus_T=param[13], phi_hp_minus_T=param[14],
                 gamma_version=param[15],
-                used_instances=param[16],
-                used_storage_det=param[17],
-                manual_debug=param[18], 
-                criteria_bf=param[19], 
-                numero_instance=param[20],
-                dbg=param[21])
+                ppi_t_base=param[16],
+                used_instances=param[17],
+                used_storage_det=param[18],
+                manual_debug=param[19], 
+                criteria_bf=param[20], 
+                numero_instance=param[21],
+                dbg=param[22])
 # _________               execution procedurale : fin              ___________
 
 if __name__ == "__main__":
@@ -223,9 +236,9 @@ if __name__ == "__main__":
     
     date_hhmm="DDMM_HHMM"
     t_periods = 1 #50 #30 #35 #55 #117 #15 #3
-    k_steps = 1000 #10000 #250 #50000 #250 #5000 #2000 #50 #250
+    k_steps = 30000 #250 #50000 #10000 #250 #50000 #250 #5000 #2000 #50 #250 10000
     NB_REPEAT_K_MAX= 3 #10 #3 #15 #30
-    learning_rates = [0.1] #[0.01] #[0.01]#[0.1] #[0.001]#[0.00001] #[0.01] #[0.0001]
+    learning_rates = [0.01] #[0.01] #[0.01]#[0.1] #[0.001]#[0.00001] #[0.01] #[0.0001]
     fct_aux.N_DECIMALS = 8
     dico_phiname_ab = {"A1B1": {"a":1, "b":1}, "A1.2B0.8": {"a":1.2, "b":0.8}}
     dico_phiname_ab = {"A1B1": {"a":1, "b":1}}
@@ -233,7 +246,8 @@ if __name__ == "__main__":
     pi_hp_minus = [30] #[20] #[0.33] #[15, 5]
     fct_aux.PI_0_PLUS_INIT = 4 #20 #4
     fct_aux.PI_0_MINUS_INIT = 3 #10 #3
-    doc_VALUES = 24
+    doc_VALUES = 25 #24
+
     NB_INSTANCES = 10 #50
             
     
@@ -261,6 +275,7 @@ if __name__ == "__main__":
     path_to_arr_pl_M_T = os.path.join(*[name_dir, "AUTOMATE_INSTANCES_GAMES"])
     
     gamma_versions = [-2] #-1 : random normal distribution, 0: not stock anticipation, -2: normal distribution with proba ppi_k
+    ppi_t_base = 0.3 # None par defaut
     
     dico_params = {"dico_phiname_ab":dico_phiname_ab, "doc_VALUES":doc_VALUES,
         "gamma_versions":gamma_versions,
@@ -278,12 +293,14 @@ if __name__ == "__main__":
         "name_dir":name_dir, 
         "NB_REPEAT_K_MAX": NB_REPEAT_K_MAX, 
         "ksteps": k_steps, "learning_rates":learning_rates, 
-        "kstoplearn": fct_aux.STOP_LEARNING_PROBA}
+        "kstoplearn": fct_aux.STOP_LEARNING_PROBA, 
+        "ppi_t_base": ppi_t_base}
     
     params = define_parameters_MULTI_gammaV_instances_phiname_arrplMTVars(dico_params)
     print("define parameters finished")
     
     # run_procedurale_way(params)
+    
     # multi processing execution : debut
     p = mp.Pool(mp.cpu_count()-1)
     p.starmap(
